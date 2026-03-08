@@ -14,7 +14,7 @@ from flask import Flask
 from discord_id_lookup import lookup_discord_id
 
 # Carrega o token do bot de uma variável de ambiente para segurança
-TOKEN = os.getenv('MTQ4MDI1Mjk1ODg4NDEwNjI4MA.GBY0Gt.j3RVR3sy6yhgHR4TdUsF58umkRDOxURdmYbElw')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 # Define os intents necessários para o bot
 intents = discord.Intents.default()
@@ -29,7 +29,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 app = Flask(__name__)
 
 
-@app.get('/')
+@app.route('/', methods=['GET'])
 def healthcheck():
     return 'Bot is running', 200
 
@@ -100,5 +100,10 @@ if __name__ == '__main__':
         print("Erro: Variável de ambiente 'DISCORD_TOKEN' não encontrada.")
         print("Por favor, defina a variável de ambiente com o token do seu bot.")
     else:
-        threading.Thread(target=run_web_server, daemon=True).start()
         bot.run(TOKEN)
+        try:
+            threading.Thread(target=run_web_server, daemon=True).start()
+            bot.run(TOKEN)
+        except discord.LoginFailure:
+            print("Erro: token do Discord inválido. Verifique a variável de ambiente 'DISCORD_TOKEN'.")
+            raise
