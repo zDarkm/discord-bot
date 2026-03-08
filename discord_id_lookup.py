@@ -1,4 +1,14 @@
-:")).encode()
+import requests
+import json
+import base64
+import asyncio
+
+lookup_url = "https://api.discord.id/v1/lookup"
+
+async def lookup_discord_id(discord_id, bot_token):
+    try:
+        proof = base64.b64encode(
+            f"{discord_id}:{bot_token}".encode()
         ).decode()
 
         payload = {
@@ -7,29 +17,22 @@
             "token": bot_token
         }
 
-        lookup_headers = {
-          'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
-          'Accept-Encoding': "gzip, deflate, br, zstd",
-          'Content-Type': "application/json",
-          'sec-ch-ua-platform': "\"Android\"",
-          'sec-ch-ua': "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"",
-          'sec-ch-ua-mobile': "?1",
-          'origin': "https://discord.id",
-          'sec-fetch-site': "same-site",
-          'sec-fetch-mode': "cors",
-          'sec-fetch-dest': "empty",
-          'referer': "https://discord.id/",
-          'accept-language': "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-          'priority': "u=1, i"
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
         }
 
-        response = requests.post(
-            lookup_url,
-            data=json.dumps(payload),
-            headers=lookup_headers
-        )
-        response.raise_for_status()
-        return response.json()
+        def make_request():
+            response = requests.post(
+                lookup_url,
+                data=json.dumps(payload),
+                headers=headers
+            )
+            response.raise_for_status()
+            return response.json()
+
+        result = await asyncio.to_thread(make_request)
+        return result
 
     except requests.exceptions.RequestException as e:
         return {"error": f"Erro na requisição HTTP: {e}"}
