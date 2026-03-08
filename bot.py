@@ -14,7 +14,7 @@ from flask import Flask
 from discord_id_lookup import lookup_discord_id
 
 # Carrega o token do bot de uma variável de ambiente para segurança
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('MTQ4MDI1Mjk1ODg4NDEwNjI4MA.GBY0Gt.j3RVR3sy6yhgHR4TdUsF58umkRDOxURdmYbElw')
 
 # Define os intents necessários para o bot
 intents = discord.Intents.default()
