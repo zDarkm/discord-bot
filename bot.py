@@ -32,7 +32,7 @@ def healthcheck():
 
 def run_web_server():
     port = int(os.getenv('PORT', '10000'))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, use_reloader=False)
 
 
 @bot.event
@@ -73,7 +73,16 @@ async def id_command(interaction: discord.Interaction, user_id: str):
         await interaction.followup.send(f"Ocorreu um erro ao consultar o ID: {result['error']}")
     else:
         # Formata a resposta para o Discord
-        response_message = """
-{}
-""".format(json.dumps(result, indent=2, ensure_ascii=False))
-await interaction.followup.send(response_message)
+        formatted_json = json.dumps(result, indent=2, ensure_ascii=False)
+        response_message = f"**Informações do Discord ID:**\n```json\n{formatted_json}\n```"
+        await interaction.followup.send(response_message)
+
+
+# Inicia o bot
+if __name__ == '__main__':
+    if TOKEN is None:
+        print("Erro: Variável de ambiente 'DISCORD_TOKEN' não encontrada.")
+        print("Por favor, defina a variável de ambiente com o token do seu bot.")
+    else:
+        threading.Thread(target=run_web_server, daemon=True).start()
+        bot.run(TOKEN)
