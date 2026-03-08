@@ -74,3 +74,6 @@ async def id_command(interaction: discord.Interaction, user_id: str):
     else:
         # Formata a resposta para o Discord
         response_message = """
+{}
+""".format(json.dumps(result, indent=2, ensure_ascii=False))
+await interaction.followup.send(response_message)
