@@ -3,7 +3,11 @@ import os
 import threading
 
 import discord
+from discord.ext import commands
 from discord import app_commands
+import os
+import asyncio
+import json
 from discord.ext import commands
 from flask import Flask
 
@@ -60,6 +64,7 @@ async def info(ctx):
 @bot.tree.command(name='id', description='Consulta informações de um ID do Discord.')
 @app_commands.describe(user_id='O ID do usuário do Discord para consultar.')
 async def id_command(interaction: discord.Interaction, user_id: str):
+    await interaction.response.defer(ephemeral=True) # Deferir a resposta para evitar timeout
     await interaction.response.defer(ephemeral=True)  # Deferir a resposta para evitar timeout
 
     if not TOKEN:
@@ -69,10 +74,21 @@ async def id_command(interaction: discord.Interaction, user_id: str):
     # Chama a função de consulta
     result = await lookup_discord_id(user_id, TOKEN)
 
-    if 'error' in result:
+    if "error" in result:
         await interaction.followup.send(f"Ocorreu um erro ao consultar o ID: {result['error']}")
+    if 'error' in result:
+        error_message = f"Ocorreu um erro ao consultar o ID: {result['error']}"
+        if result.get('details'):
+            error_message += f"\nDetalhes técnicos: {result['details']}"
+        await interaction.followup.send(error_message)
     else:
         # Formata a resposta para o Discord
+        response_message = """
+**Informações do Discord ID:**
+```json
+{}
+```
+""".format(json.dumps(result, indent=2, ensure_ascii=False))
         formatted_json = json.dumps(result, indent=2, ensure_ascii=False)
         response_message = f"**Informações do Discord ID:**\n```json\n{formatted_json}\n```"
         await interaction.followup.send(response_message)
