@@ -15,12 +15,18 @@ lookup_url = os.getenv('DISCORD_LOOKUP_URL', 'https://api.discord.id/v1/lookup')
 
 def _build_session():
     session = requests.Session()
-    retries = Retry(
-        total=3,
-        backoff_factor=0.5,
-        status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=("POST",),
-    )
+    retry_kwargs = {
+        'total': 3,
+        'backoff_factor': 0.5,
+        'status_forcelist': (429, 500, 502, 503, 504),
+    }
+
+    try:
+        retries = Retry(allowed_methods=("POST",), **retry_kwargs)
+    except TypeError:
+        # Compatibilidade com urllib3 antigo
+        retries = Retry(method_whitelist=("POST",), **retry_kwargs)
+
     adapter = HTTPAdapter(max_retries=retries)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
